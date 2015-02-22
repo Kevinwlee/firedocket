@@ -45,7 +45,8 @@
 		0AAAD7591A98B180003BA440 /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		0AAAD75B1A997D1F003BA440 /* ActionItemsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionItemsTableViewController.h; sourceTree = "<group>"; };
 		0AAAD75C1A997D20003BA440 /* ActionItemsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActionItemsTableViewController.m; sourceTree = "<group>"; };
-		A43E0DBE7B0141C3B5190445 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
+		0F245A9C3FB6C5B417881069 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		AEC17801722CA5471D7FCF43 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		C7651EE7865C45578533EADF /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -76,8 +77,8 @@
 				0A35F6661A98A165004171EA /* DocketMethod-iPhone */,
 				0A35F6801A98A166004171EA /* DocketMethod-iPhoneTests */,
 				0A35F6651A98A165004171EA /* Products */,
-				A43E0DBE7B0141C3B5190445 /* Pods.xcconfig */,
 				FCF63B6FE5D446989D6FC408 /* Frameworks */,
+				EFB2AA7BE7BD4043FA5705D3 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -95,12 +96,12 @@
 			children = (
 				0A35F66B1A98A165004171EA /* AppDelegate.h */,
 				0A35F66C1A98A165004171EA /* AppDelegate.m */,
+				0AAAD75B1A997D1F003BA440 /* ActionItemsTableViewController.h */,
+				0AAAD75C1A997D20003BA440 /* ActionItemsTableViewController.m */,
 				0A35F6711A98A165004171EA /* Main.storyboard */,
 				0A35F6741A98A165004171EA /* Images.xcassets */,
 				0A35F6761A98A165004171EA /* LaunchScreen.xib */,
 				0A35F6671A98A165004171EA /* Supporting Files */,
-				0AAAD75B1A997D1F003BA440 /* ActionItemsTableViewController.h */,
-				0AAAD75C1A997D20003BA440 /* ActionItemsTableViewController.m */,
 			);
 			path = "DocketMethod-iPhone";
 			sourceTree = "<group>";
@@ -129,6 +130,15 @@
 				0A35F6821A98A166004171EA /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		EFB2AA7BE7BD4043FA5705D3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0F245A9C3FB6C5B417881069 /* Pods.debug.xcconfig */,
+				AEC17801722CA5471D7FCF43 /* Pods.release.xcconfig */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 		FCF63B6FE5D446989D6FC408 /* Frameworks */ = {
@@ -251,7 +261,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Pods-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		60C6286D854849D081485AAA /* Check Pods Manifest.lock */ = {
@@ -398,7 +408,7 @@
 		};
 		0A35F6881A98A166004171EA /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A43E0DBE7B0141C3B5190445 /* Pods.xcconfig */;
+			baseConfigurationReference = 0F245A9C3FB6C5B417881069 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "DocketMethod-iPhone/Info.plist";
@@ -409,7 +419,7 @@
 		};
 		0A35F6891A98A166004171EA /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A43E0DBE7B0141C3B5190445 /* Pods.xcconfig */;
+			baseConfigurationReference = AEC17801722CA5471D7FCF43 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "DocketMethod-iPhone/Info.plist";

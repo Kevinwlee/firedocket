@@ -1,10 +1,27 @@
 PODS:
   - Firebase (2.2.0)
+  - FontAwesomeKit (2.2.0):
+    - FontAwesomeKit/Core (= 2.2.0)
+    - FontAwesomeKit/FontAwesome (= 2.2.0)
+    - FontAwesomeKit/FoundationIcons (= 2.2.0)
+    - FontAwesomeKit/IonIcons (= 2.2.0)
+    - FontAwesomeKit/Zocial (= 2.2.0)
+  - FontAwesomeKit/Core (2.2.0)
+  - FontAwesomeKit/FontAwesome (2.2.0):
+    - FontAwesomeKit/Core
+  - FontAwesomeKit/FoundationIcons (2.2.0):
+    - FontAwesomeKit/Core
+  - FontAwesomeKit/IonIcons (2.2.0):
+    - FontAwesomeKit/Core
+  - FontAwesomeKit/Zocial (2.2.0):
+    - FontAwesomeKit/Core
 
 DEPENDENCIES:
   - Firebase (>= 2.2.0)
+  - FontAwesomeKit (~> 2.2)
 
 SPEC CHECKSUMS:
   Firebase: e7a2ea2ffeff99f9c37028b354194dcc9718d36b
+  FontAwesomeKit: 61f0b4f12f1b11b7489bc7d1507a8692547f3857
 
-COCOAPODS: 0.32.1
+COCOAPODS: 0.35.0

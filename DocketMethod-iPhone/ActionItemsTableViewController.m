@@ -8,6 +8,11 @@
 
 #import "ActionItemsTableViewController.h"
 #import <Firebase/Firebase.h>
+#import <FontAwesomeKit/FAKFontAwesome.h>
+#import <FontAwesomeKit/FAKFoundationIcons.h>
+#import <FontAwesomeKit/FAKZocial.h>
+#import <FontAwesomeKit/FAKIonIcons.h>
+
 
 @interface ActionItemsTableViewController ()
 @property (nonatomic, strong) NSMutableDictionary *items;
@@ -101,15 +106,49 @@
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 2;
+    return 3;
 }
 
+//- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+//    FAKFontAwesome *starIcon = [FAKFontAwesome starIconWithSize:15];
+//    [starIcon characterCode];
+//    NSAttributedString *mit = [[NSAttributedString alloc] initWithString: @" MIT"];
+//    NSMutableAttributedString *star = [[NSMutableAttributedString alloc] initWithAttributedString:[starIcon attributedString]];
+//    [star appendAttributedString:mit];
+//    UILabel *atributedLabel = [[UILabel alloc] init];
+//    atributedLabel.attributedText = star;
+//
+//    FAKFontAwesome *squareOIcon = [FAKFontAwesome squareOIconWithSize:15];
+//    [starIcon characterCode];
+//    NSAttributedString *action = [[NSAttributedString alloc] initWithString: @" Action Items"];
+//    NSMutableAttributedString *square = [[NSMutableAttributedString alloc] initWithAttributedString:[squareOIcon attributedString]];
+//    [square appendAttributedString:action];
+//    
+//    switch (section) {
+//        case 0:
+//            atributedLabel.attributedText = star;
+//            return atributedLabel;
+//            break;
+//            
+//        default:
+//            atributedLabel.attributedText = square;
+//            return atributedLabel;
+//            break;
+//    }
+//}
+
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    
     switch (section) {
         case 0:
             return @"MIT";
             break;
-            
+        case 1:
+            return @"Action Items";
+            break;
+        case 2:
+            return @"Docket";
+            break;
         default:
             return @"Action Items";
             break;
@@ -136,44 +175,68 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"FirebaseCell" forIndexPath:indexPath];
     
-    NSString *itemText;
     NSString *key;
-    
+    NSDictionary *item;
     switch (indexPath.section) {
         case 0:
             key = [[self.importantItems allKeys] objectAtIndex:indexPath.row];
-            itemText = self.importantItems[key][@"text"];
+            item = self.importantItems[key];
             break;
             
         default:
             key = [[self.items allKeys] objectAtIndex:indexPath.row];
-            itemText = self.items[key][@"text"];
+            item = self.items[key];
 
             break;
     }
-    cell.textLabel.text = itemText;
-    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+
+    cell.textLabel.text = item[@"text"];
+
+    if ([item[@"completed"] boolValue]) {
+        cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    } else {
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+
     return cell;
+}
+
+- (void)toggleActionItemCompletion:(NSIndexPath *)indexPath {
+    NSString *key = [[self.items allKeys] objectAtIndex:indexPath.row];
+    NSMutableDictionary *item = self.items[key];
+
+    
+    if ([item[@"completed"] boolValue]) {
+        [item setValue:@"false" forKey:@"completed"];
+    } else {
+        [item setValue:@"true" forKey:@"completed"];
+    }
+    
+    [self.rootRef updateChildValues:@{key:item} withCompletionBlock:^(NSError *error, Firebase *ref) {
+        if (error) {
+            NSLog(@"Error %@", error);
+        }
+        
+    }];
+    
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSString *key;
-    NSDictionary *item;
+    NSMutableDictionary *item;
     
     switch (indexPath.section) {
         case 0:
             key = [[self.importantItems allKeys] objectAtIndex:indexPath.row];
             item = self.importantItems[key];
-            
+
             NSLog(@"Item %@", item);
 
             break;
         case 1:
-            key = [[self.items allKeys] objectAtIndex:indexPath.row];
-            item = self.items[key];
             
-            NSLog(@"Item %@", item);
+            [self toggleActionItemCompletion:indexPath];
 
             break;
         default:
