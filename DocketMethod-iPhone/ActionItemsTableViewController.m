@@ -11,6 +11,7 @@
 
 @interface ActionItemsTableViewController ()
 @property (nonatomic, strong) NSMutableDictionary *items;
+@property (nonatomic, strong) NSMutableDictionary *importantItems;
 @property (nonatomic, strong) Firebase *rootRef;
 
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
@@ -25,8 +26,20 @@
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     self.items = [NSMutableDictionary dictionary];
-    self.rootRef = [[Firebase alloc] initWithUrl:@"https://docketmethod.firebaseio.com/"];
-
+    self.importantItems = [NSMutableDictionary dictionary];
+    self.rootRef = [[Firebase alloc] initWithUrl:@"https://intense-fire-3296.firebaseio.com/2/action_items"];
+    
+    Firebase *mitRef = [[Firebase alloc] initWithUrl:@"https://intense-fire-3296.firebaseio.com/2/mit"];
+    Firebase *docketRef = [[Firebase alloc] initWithUrl:@"https://intense-fire-3296.firebaseio.com/2/dockets"];
+    
+    [mitRef observeSingleEventOfType:FEventTypeValue andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *prevKey) {
+        [self.importantItems addEntriesFromDictionary:snapshot.value];
+        NSLog(@"%@ -> %@", snapshot.key, snapshot.value);
+        [self.tableView reloadData];
+        
+    }];
+    
+    
     [self.rootRef observeSingleEventOfType:FEventTypeValue andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *prevKey) {
         [self.items addEntriesFromDictionary:snapshot.value];
         NSLog(@"%@ -> %@", snapshot.key, snapshot.value);
@@ -39,9 +52,9 @@
 
 }
 
-- (NSIndexPath *)indexPathForKey:(NSString *)key {
+- (NSIndexPath *)indexPathForKey:(NSString *)key section:(NSInteger)section {
     NSUInteger i = [self.items.allKeys indexOfObject:key];
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:section];
     return indexPath;
 }
 
@@ -50,7 +63,7 @@
     [self.rootRef observeEventType:FEventTypeChildAdded andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *previousKey) {
         NSLog(@"Added %@ -> %@", snapshot.key, snapshot.value);
 
-        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key];
+        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key section:1];
         
         [self.tableView beginUpdates];
         [self.items setValue:snapshot.value forKey:snapshot.key];
@@ -61,7 +74,7 @@
     [self.rootRef observeEventType:FEventTypeChildChanged andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *previousKey) {
         NSLog(@"Changed %@ -> %@", snapshot.key, snapshot.value);
 
-        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key];
+        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key section:1];
         
         [self.items setValue:snapshot.value forKey:snapshot.key];
         [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -71,7 +84,7 @@
     [self.rootRef observeEventType:FEventTypeChildRemoved andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *previousKey) {
         NSLog(@"Deleted %@ -> %@", snapshot.key, snapshot.value);
         
-        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key];
+        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key section:1];
         
         [self.tableView beginUpdates];
         [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -88,31 +101,85 @@
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    return 2;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    switch (section) {
+        case 0:
+            return @"MIT";
+            break;
+            
+        default:
+            return @"Action Items";
+            break;
+    }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     // Return the number of rows in the section.
-    return self.items.count;
+    switch (section) {
+        case 0:
+            return [self.importantItems count];
+            break;
+        case 1:
+            return [self.items count];
+            break;
+        default:
+            return 0;
+            break;
+    }
+
 }
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"FirebaseCell" forIndexPath:indexPath];
     
-    // Configure the cell...
-    NSString *key = [[self.items allKeys] objectAtIndex:indexPath.row];
-    NSString *value = self.items[key];
-    cell.textLabel.text = value;
+    NSString *itemText;
+    NSString *key;
+    
+    switch (indexPath.section) {
+        case 0:
+            key = [[self.importantItems allKeys] objectAtIndex:indexPath.row];
+            itemText = self.importantItems[key][@"text"];
+            break;
+            
+        default:
+            key = [[self.items allKeys] objectAtIndex:indexPath.row];
+            itemText = self.items[key][@"text"];
+
+            break;
+    }
+    cell.textLabel.text = itemText;
     cell.accessoryType = UITableViewCellAccessoryCheckmark;
     return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSString *key = [[self.items allKeys] objectAtIndex:indexPath.row];
-    NSString *value = self.items[key];
-    NSString *newVaule = [NSString stringWithFormat:@"Updated %@", value];
-    [self.rootRef updateChildValues:@{key:newVaule}];
+    
+    NSString *key;
+    NSDictionary *item;
+    
+    switch (indexPath.section) {
+        case 0:
+            key = [[self.importantItems allKeys] objectAtIndex:indexPath.row];
+            item = self.importantItems[key];
+            
+            NSLog(@"Item %@", item);
+
+            break;
+        case 1:
+            key = [[self.items allKeys] objectAtIndex:indexPath.row];
+            item = self.items[key];
+            
+            NSLog(@"Item %@", item);
+
+            break;
+        default:
+            break;
+    }
+
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
