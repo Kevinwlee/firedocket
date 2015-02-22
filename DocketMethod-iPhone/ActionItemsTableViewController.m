@@ -12,6 +12,7 @@
 @interface ActionItemsTableViewController ()
 @property (nonatomic, strong) NSMutableDictionary *items;
 @property (nonatomic, strong) Firebase *rootRef;
+
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
 
 @end
@@ -21,28 +22,67 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     self.items = [NSMutableDictionary dictionary];
     self.rootRef = [[Firebase alloc] initWithUrl:@"https://docketmethod.firebaseio.com/"];
-//    [[self.rootRef childByAutoId] setValue:@"Kevin"];
-//    [[self.rootRef childByAutoId] setValue:@"Natalie"];
-//    [[self.rootRef childByAutoId] setValue:@"Warren"];
-    // Read data and react to changes
-    [self.rootRef observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+
+    [self.rootRef observeSingleEventOfType:FEventTypeValue andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *prevKey) {
         [self.items addEntriesFromDictionary:snapshot.value];
         NSLog(@"%@ -> %@", snapshot.key, snapshot.value);
         [self.tableView reloadData];
+
+        //begin monitoring changes
+        [self monitorFireBase];
+    }];
+    
+
+}
+
+- (NSIndexPath *)indexPathForKey:(NSString *)key {
+    NSUInteger i = [self.items.allKeys indexOfObject:key];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
+    return indexPath;
+}
+
+- (void)monitorFireBase {
+    
+    [self.rootRef observeEventType:FEventTypeChildAdded andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *previousKey) {
+        NSLog(@"Added %@ -> %@", snapshot.key, snapshot.value);
+
+        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key];
+        
+        [self.tableView beginUpdates];
+        [self.items setValue:snapshot.value forKey:snapshot.key];
+        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        [self.tableView endUpdates];
+    }];
+    
+    [self.rootRef observeEventType:FEventTypeChildChanged andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *previousKey) {
+        NSLog(@"Changed %@ -> %@", snapshot.key, snapshot.value);
+
+        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key];
+        
+        [self.items setValue:snapshot.value forKey:snapshot.key];
+        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        
+    }];
+
+    [self.rootRef observeEventType:FEventTypeChildRemoved andPreviousSiblingKeyWithBlock:^(FDataSnapshot *snapshot, NSString *previousKey) {
+        NSLog(@"Deleted %@ -> %@", snapshot.key, snapshot.value);
+        
+        NSIndexPath *indexPath = [self indexPathForKey:snapshot.key];
+        
+        [self.tableView beginUpdates];
+        [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        [self.items removeObjectForKey:snapshot.key];
+        [self.tableView endUpdates];        
     }];
 
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - Table view data source
@@ -64,9 +104,17 @@
     NSString *key = [[self.items allKeys] objectAtIndex:indexPath.row];
     NSString *value = self.items[key];
     cell.textLabel.text = value;
+    cell.accessoryType = UITableViewCellAccessoryCheckmark;
     return cell;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSString *key = [[self.items allKeys] objectAtIndex:indexPath.row];
+    NSString *value = self.items[key];
+    NSString *newVaule = [NSString stringWithFormat:@"Updated %@", value];
+    [self.rootRef updateChildValues:@{key:newVaule}];
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
 
 /*
 // Override to support conditional editing of the table view.
@@ -112,4 +160,7 @@
 }
 */
 
+- (void)dealloc {
+    [self.rootRef removeAllObservers];
+}
 @end
